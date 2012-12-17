@@ -4,6 +4,10 @@
   "description": "User Signin for your Express Application",
   "keywords": ["Express", "Signin"],
   "author": "RGBboy <me@rgbboy.com>",
+  "repository" : {
+    "type" : "git",
+    "url" : "http://github.com/RGBboy/express-signin"
+  },
   "main": "index",
   "engines": {
     "node": "0.8.x"
