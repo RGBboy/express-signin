@@ -7,52 +7,90 @@
  */
 
 var express = require('express'),
-    app = module.exports = express(),
     config = require('./config'),
     mongoose = require('mongoose'),
+    namedRoutes = require('express-named-routes'),
+    attach = require('attach'),
+    Storekeeper = require('storekeeper'),
     flash = require('express-flash'),
-    User = require('basic-user-model'),
-    signin = require('../index');
-
-// Connect to DB
-if (!mongoose.connection.db) {
-  mongoose.connect(config.db.url);
-};
-
-// Views
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
-app.set('view options', { layout: false });
-
-// Configuration
-app.use(express.bodyParser());
-app.use(express.static(__dirname + '/public'));
-
-app.use(express.cookieParser(config.cookieSecret));
-app.use(express.session({ cookie: { maxAge: 60000 }}));
-
-// Flash
-app.use(flash());
-
-// Signin
-
-app.use(signin(User));
-
-// Routes
-app.get('/', function (req, res) {
-  res.render('index', {
-    title: 'Home'
-  });
-});
-
-// Error Handler
-app.use(express.errorHandler());
+    UserSchema = require('basic-user-schema'),
+    Signin = require('../index');
 
 /**
- * Module exports.
+ * Module Exports
  */
 
+exports = module.exports = function () {
+
+  var self = express(),
+      shared = {
+        model: function () {
+          return mongoose.model.apply(mongoose, arguments);
+        }
+      },
+      signin = Signin(shared);
+
+  namedRoutes.extend(self);
+  attach.extend(self);
+
+  function init () {
+
+    // Connect to DB
+    if (!mongoose.connection.db) {
+      mongoose.connect(config.db.url);
+    };
+
+    shared.model('User', UserSchema());
+
+    // Define Named Routes
+    self.defineRoute('index', '/');
+    self.defineRoute('signin', '/'); // signin will be attached here
+
+    // Views
+    self.set('views', __dirname + '/views');
+    self.set('view engine', 'jade');
+    self.set('view options', { layout: false });
+
+    // Middleware
+    self.use(express.bodyParser());
+    self.use(express.static(__dirname + '/public'));
+    self.use(express.cookieParser(config.cookieSecret));
+    self.use(express.session({ cookie: { maxAge: 60000 }}));
+    self.use(flash());
+
+    // Routes
+    self.get(self.lookupRoute('index'), function (req, res) {
+      res.render('index', {
+        title: 'Home'
+      });
+    });
+
+    // Signin
+
+    self.attach('signin', signin);
+
+    // Error Handler Middleware
+    self.use(express.errorHandler());
+
+    self.emit('init');
+
+  };
+
+  function ready () {
+    self.emit('ready');
+  };
+
+  signin.on('init', init);
+  signin.on('ready', ready);
+
+  return self;
+
+};
+
 if (!module.parent) {
-  app.listen(8000);
-  console.log('Express app started on port 8000');
+  var app = module.exports();
+  app.on('ready', function () {
+    app.listen(8000);
+    console.log('App started on port 8000');
+  });
 };

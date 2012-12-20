@@ -9,8 +9,8 @@
  * Module dependencies.
  */
 
-var app = require('../example/app'),
-    UserModel = require('basic-user-model'),
+var App = require('../example/app'),
+    mongoose = require('mongoose'),
     request = require('superagent'),
     should = require('should');
 
@@ -20,7 +20,9 @@ var app = require('../example/app'),
 
 describe('Sign In', function () {
 
-  var fakeUser = {
+  var app,
+      UserModel,
+      fakeUser = {
         email: 'test@test.com',
         password: 'testPassword'
       },
@@ -30,27 +32,32 @@ describe('Sign In', function () {
 
   before(function (done) {
 
-    if (!app.address) {
-      var port = 8000;
-      server = app.listen(port);
-      baseURL = 'http://localhost:' + port;
-    } else {
-      baseURL = 'http://localhost:' + app.address().port;
-    }
+    app = App();
 
-    var newUser;
-    UserModel.remove(function (err) {
-      if (err) { throw err };
-      newUser = new UserModel({
-        email: fakeUser.email,
-        password: fakeUser.password,
-        passwordConfirm: fakeUser.password
+    app.on('ready', function () {
+      UserModel = mongoose.model('User');
+      if (!app.address) {
+        var port = 8000;
+        server = app.listen(port);
+        baseURL = 'http://localhost:' + port;
+      } else {
+        baseURL = 'http://localhost:' + app.address().port;
+      };
+
+      var newUser;
+      UserModel.remove(function (err) {
+        if (err) { throw err };
+        newUser = new UserModel({
+          email: fakeUser.email,
+          password: fakeUser.password,
+          passwordConfirm: fakeUser.password
+        });
+        newUser.save(function (err, user) {
+          user = user;
+          done();
+        });
       });
-      newUser.save(function (err, user) {
-        user = user;
-        done();
-      });
-    });
+    })
   });
 
   after(function (done) {
