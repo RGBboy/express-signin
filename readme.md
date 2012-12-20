@@ -12,24 +12,45 @@
 
 ## Usage
 
-Require it:
-
 ``` javascript
-  signin = require('express-signin');
-```
+  var Signin = require('express-signin'),
+      express = require('express'),
+      mongoose = require('mongoose'),
+      app = express(),
+      namedRoutes = require('express-named-routes'),
+      attach = require('attach'),
+      shared = {
+        model: function () {
+          return mongoose.model.apply(mongoose, arguments);
+        }
+      },
+      signin = Signin(shared);
 
-Use it:
+  namedRoutes.extend(app);
+  attach.extend(app);
 
-``` javascript
-  app.use(signin(route, UserModel))
+  // Views
+  self.set('views', __dirname + '/views');
+  self.set('view engine', 'jade');
+  self.set('view options', { layout: false });
+
+  // Middleware
+  self.use(express.bodyParser());
+  self.use(express.cookieParser(config.cookieSecret));
+  self.use(express.session({ cookie: { maxAge: 60000 }}));
+  self.use(flash());
+
+  // Component
+  app.defineRoute('signin', '/some/url/to/signin/base');
+  app.attach('signin', signin);
 ```
 
 ## Requires
 
 ### Middleware
 
-  The following middleware should be used by the application before the 
-  Signin Component:
+  The following middleware should be used by the application before attaching 
+  the Signin Component:
 
   * express.bodyParser
   * express.cookieParser
@@ -44,7 +65,11 @@ Use it:
 
 ### Other
 
-  Express Signin requires a User Model to be passed in upon construction. 
+  Express Signin requires a shared object to be passed in upon construction.
+  The shared object must implement a model method for retrieving models by name.
+  Before attaching the Signin Component the model 'User' must be available
+  from shared.model('User');
+
   The User Model needs to implement the following:
 
 #### User.findByEmail(email, function (err, user) {})
