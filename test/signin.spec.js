@@ -116,6 +116,23 @@ describe('Sign In', function () {
 
     describe('when incorrect crudentials are POSTed', function () {
 
+      it('should redirect back to /signin', function (done) {
+        request.agent()
+          .post(baseURL + '/signin')
+          .redirects(0)
+          .send({
+            user: {
+              email: '',
+              password: fakeUser.password
+            }
+          })
+          .end(function (err, res) {
+            res.statusCode.should.equal(302);
+            res.headers.should.have.property('location').match(/\/signin$/);
+            done();
+          });
+      });
+
       it('should show an error if email is empty', function (done) {
         request.agent()
           .post(baseURL + '/signin')
