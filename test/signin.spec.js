@@ -114,6 +114,22 @@ describe('Sign In', function () {
 
     });
 
+    describe('when nothing is POSTed', function () {
+
+      it('should redirect back to /signin', function (done) {
+        request.agent()
+          .post(baseURL + '/signin')
+          .redirects(0)
+          .send({})
+          .end(function (err, res) {
+            res.headers.should.have.property('location').match(/\/signin$/);
+            res.statusCode.should.equal(302)
+            done();
+          });
+      });
+
+    });
+
     describe('when incorrect crudentials are POSTed', function () {
 
       it('should redirect back to /signin', function (done) {
