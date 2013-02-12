@@ -1,6 +1,6 @@
 {
   "name": "express-signin",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "User Signin for your Express Application",
   "keywords": ["Express", "Signin"],
   "author": "RGBboy <me@rgbboy.com>",
