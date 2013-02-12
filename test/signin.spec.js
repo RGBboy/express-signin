@@ -112,6 +112,28 @@ describe('Sign In', function () {
           });
       });
 
+      it('should redirect to the original requested page', function (done) {
+        var agent = request.agent();
+        agent
+          .get(baseURL + '/restricted')
+          .redirects(1)
+          .end(function (err, res) {
+            res.statusCode.should.equal(200)
+            res.req.path.should.equal('/signin');
+            agent
+              .post(baseURL + '/signin')
+              .redirects(0)
+              .send({
+                user: fakeUser
+              })
+              .end(function (err, res) {
+                res.headers.should.have.property('location').match(/\/restricted$/);
+                res.statusCode.should.equal(302)
+                done();
+              });
+          });
+      });
+
     });
 
     describe('when nothing is POSTed', function () {
