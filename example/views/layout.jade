@@ -15,6 +15,12 @@ html
               button.close(type = 'button', data-dismiss = 'alert') ×
               strong Info: 
               span= message
+        - if (messages.warning)
+          - each message in messages.warning
+            .alert.alert-warning
+              button.close(type = 'button', data-dismiss = 'alert') ×
+              strong Warning: 
+              span= message
         - if (messages.error)
           - each message in messages.error
             .alert.alert-error
@@ -26,6 +32,8 @@ html
           ul.well.nav.nav-list
             li
               a(href = '/') Home
+            li
+              a(href = '/restricted') Restricted Route
             li
               a(href = '/signin') Sign In
             li

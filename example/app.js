@@ -13,6 +13,8 @@ var express = require('express'),
     attach = require('attach'),
     Storekeeper = require('storekeeper'),
     flash = require('express-flash'),
+    restrict = require('express-restrict'),
+    authenticate = require('express-authenticate'),
     UserSchema = require('basic-user-schema'),
     Signin = require('../index');
 
@@ -45,6 +47,7 @@ exports = module.exports = function () {
     // Define Named Routes
     self.defineRoute('index', '/');
     self.defineRoute('signin', '/'); // signin will be attached here
+    self.defineRoute('restricted-route', '/restricted');
 
     // Views
     self.set('views', __dirname + '/views');
@@ -56,12 +59,19 @@ exports = module.exports = function () {
     self.use(express.static(__dirname + '/public'));
     self.use(express.cookieParser(config.cookieSecret));
     self.use(express.session({ cookie: { maxAge: 60000 }}));
+    self.use(authenticate(shared.model('User')));
     self.use(flash());
 
     // Routes
     self.get(self.lookupRoute('index'), function (req, res) {
       res.render('index', {
         title: 'Home'
+      });
+    });
+
+    self.get(self.lookupRoute('restricted-route'), restrict.to('role', 'user'), function (req, res) {
+      res.render('index', {
+        title: 'Restricted Route'
       });
     });
 

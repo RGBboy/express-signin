@@ -23,6 +23,8 @@
     "storekeeper": "0.0.x",
     "mongoose": "3.5.x",
     "express-flash": "git://github.com/RGBboy/express-flash.git",
+    "express-restrict": "0.0.x",
+    "express-authenticate": "0.0.x",
     "basic-user-schema": "git://github.com/RGBboy/basic-user-schema.git",
     "mocha": "1.5.x",
     "superagent": "0.9.x",
